@@ -79,6 +79,20 @@ const nowStr = () => {
   return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
 };
 
+
+// URL → Page mapping for initial load
+const URL_TO_PAGE: Record<string, string> = {
+  '/dashboard': 'dashboard', '/products': 'products', '/orders': 'orders',
+  '/messages': 'conversations', '/customers': 'customers', '/analytics': 'analytics',
+  '/connections': 'connections', '/delivery': 'delivery', '/notifications': 'notifications',
+  '/settings': 'settings', '/studio': 'banner', '/editor': 'editor',
+};
+
+function getInitialPage(): Page {
+  const path = window.location.pathname;
+  return (URL_TO_PAGE[path] as Page) || 'dashboard';
+}
+
 // Read token from localStorage on startup
 const storedToken = (() => { try { return localStorage.getItem('ai_commerce_token'); } catch { return null; } })();
 if (storedToken) api.setToken(storedToken);
@@ -94,7 +108,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     conversations: seedConversations,
     auditLogs: seedAuditLogs,
     notifications: [] as AppNotification[],
-    currentPage: 'dashboard' as Page,
+    currentPage: (storedToken ? getInitialPage() : 'dashboard') as Page,
     currentRole: 'admin' as UserRole,
     isOnline: false,
     sidebarOpen: false,
@@ -195,8 +209,11 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const { token, user } = await api.authAPI.login({ email, password });
     api.setToken(token);
     setState(s => ({ ...s, token, user, currentPage: 'dashboard' }));
-    // Load data after login
     setTimeout(() => refreshData(), 100);
+    // Redirect to dashboard
+    if (window.location.pathname === '/' || window.location.pathname === '/login' || window.location.pathname === '/register') {
+      window.history.pushState({}, '', '/dashboard');
+    }
   };
 
   const register = async (name: string, email: string, password: string, storeName?: string) => {
@@ -204,12 +221,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     api.setToken(token);
     setState(s => ({ ...s, token, user, currentPage: 'dashboard', settings: { ...s.settings, onboardingDone: false as any } }));
     setTimeout(() => refreshData(), 100);
+    if (window.location.pathname === '/' || window.location.pathname === '/login' || window.location.pathname === '/register') {
+      window.history.pushState({}, '', '/dashboard');
+    }
   };
 
   const logout = () => {
     api.setToken(null);
     api.disconnectWS();
     setState(s => ({ ...s, token: null, user: null, currentPage: 'dashboard', products: seedProducts, orders: seedOrders, customers: seedCustomers, conversations: seedConversations }));
+    window.location.href = '/login';
   };
 
   // ── SETTINGS ──────────────────────────────────────────────
