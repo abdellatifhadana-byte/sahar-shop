@@ -127,9 +127,9 @@ export default function AuthPage() {
               }} style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(255,77,26,.1)', border: '1px solid rgba(255,77,26,.25)', color: 'var(--ember2)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
                 👨‍💼 تاجر Demo
               </button>
-              <button onClick={() => setPage('storefront' as any)} style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(0,200,150,.08)', border: '1px solid rgba(0,200,150,.2)', color: 'var(--mint)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
-                🛍️ متجر الزبون
-              </button>
+              <a href="/" style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(0,200,150,.08)', border: '1px solid rgba(0,200,150,.2)', color: 'var(--mint)', cursor: 'pointer', fontWeight: 700, fontSize: 12, textDecoration:'none', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                🛍️ صفحة الزبائن
+              </a>
             </div>
           </div>
         </div>
@@ -139,6 +139,9 @@ export default function AuthPage() {
           <button onClick={() => { setIsLogin(false); setError(''); }} style={{ background: 'none', border: 'none', color: 'var(--ember)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
             أنشئ حساباً مجانياً
           </button>
+        </p>
+        <p style={{ textAlign: 'center', marginTop: 10, color: 'var(--ink3)', fontSize: 12 }}>
+          <a href="/" style={{ color: 'var(--ink3)', textDecoration: 'none' }}>← رجوع للصفحة الرئيسية</a>
         </p>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
