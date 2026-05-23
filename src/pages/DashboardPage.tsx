@@ -105,7 +105,9 @@ function AIGreeting() {
 }
 
 export default function DashboardPage() {
-  const { settings, products, orders, customers, conversations, setPage } = useStore();
+  const { settings, products, orders, customers, conversations, setPage, user } = useStore();
+  const storeLink = user?.id ? `/store/${user.id}` : null;
+  const fullStoreUrl = user?.id ? `${window.location.origin}/store/${user.id}` : null;
   const { currency } = settings.brand;
   const { goals } = settings;
 
@@ -164,6 +166,26 @@ export default function DashboardPage() {
 
   return (
     <div style={{display:'flex',flexDirection:'column',gap:16}}>
+
+      {/* Store Link Widget */}
+      {fullStoreUrl && (
+        <div style={{background:'rgba(0,200,150,.06)',border:'1px solid rgba(0,200,150,.2)',borderRadius:'var(--r)',padding:'14px 16px',display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontSize:12,fontWeight:700,color:'var(--mint)',marginBottom:4}}>🛍️ رابط متجرك للزبائن</div>
+            <div style={{fontSize:12,color:'var(--ink2)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontFamily:'var(--font-mono)'}}>{fullStoreUrl}</div>
+          </div>
+          <div style={{display:'flex',gap:8',flexShrink:0}}>
+            <button onClick={()=>navigator.clipboard?.writeText(fullStoreUrl).then(()=>window.alert('تم نسخ الرابط!'))}
+              style={{padding:'6px 14px',background:'var(--mint)',border:'none',borderRadius:8,color:'#fff',fontSize:12,fontWeight:700,cursor:'pointer'}}>
+              نسخ الرابط
+            </button>
+            <a href={storeLink!} target="_blank" rel="noreferrer"
+              style={{padding:'6px 14px',background:'var(--panel)',border:'1px solid var(--border)',borderRadius:8,color:'var(--ink2)',fontSize:12,fontWeight:700,textDecoration:'none'}}>
+              فتح
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* AI Greeting */}
       <AIGreeting />
