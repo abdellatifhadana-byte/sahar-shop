@@ -1016,3 +1016,16 @@ html.theme-blackfriday {
 .mob-icon   { display: flex; align-items: center; justify-content: center; }
 .mob-fab    { width: 46px; height: 46px; border-radius: 50%; background: var(--ember); border: none; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 16px rgba(255,77,26,.4); cursor: pointer; }
 .mob-fab-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: 2px; }
+
+/* ═══════════════════════════════════════════════
+   NAV RESPONSIVE — reliable CSS
+   ═══════════════════════════════════════════════ */
+.topnav-desktop { display: none; }
+.topnav-mobile  { display: flex; }
+.mobile-nav     { display: flex; }
+
+@media (min-width: 900px) {
+  .topnav-desktop { display: flex !important; }
+  .topnav-mobile  { display: none !important; }
+  .mobile-nav     { display: none !important; }
+}
