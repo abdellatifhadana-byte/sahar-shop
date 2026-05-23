@@ -688,6 +688,20 @@ export default function Storefront() {
     </div>
   );
 
+  if (!userId) return (
+    <div style={{ minHeight:'100dvh',background:'var(--void)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ink2)',textAlign:'center',padding:24,flexDirection:'column',gap:16 }}>
+      <div style={{ fontSize:48 }}>🏪</div>
+      <div style={{ fontSize:20,fontWeight:900,color:'var(--ink1)' }}>صفحة المتجر</div>
+      <div style={{ fontSize:14,color:'var(--ink3)',maxWidth:300,lineHeight:1.7 }}>
+        هذه الصفحة خاصة بالزبائن. رابط المتجر يكون بهذا الشكل:<br/>
+        <code style={{ background:'var(--panel)',padding:'3px 8px',borderRadius:6,fontSize:12 }}>/store/USER_ID</code>
+      </div>
+      <a href="/dashboard" style={{ padding:'10px 24px',background:'var(--ember)',borderRadius:10,color:'#fff',fontWeight:700,fontSize:14,textDecoration:'none' }}>
+        دخول لوحة التحكم
+      </a>
+    </div>
+  );
+
   if (error || (!loading && !storeInfo)) return (
     <div style={{ minHeight:'100dvh',background:'var(--void)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ink2)',textAlign:'center',padding:24 }}>
       <div><div style={{ fontSize:40,marginBottom:16 }}>🏪</div><div style={{ fontSize:18,fontWeight:700,color:'var(--ink1)',marginBottom:8 }}>المتجر غير موجود</div><div style={{ fontSize:14 }}>{error||'تحقق من الرابط'}</div></div>
