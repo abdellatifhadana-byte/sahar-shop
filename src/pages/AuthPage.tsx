@@ -122,11 +122,8 @@ export default function AuthPage() {
                 // Demo mode: use seed data directly without backend
                 setError('');
                 setLoading(true);
-                setTimeout(() => {
-                  // Inject a fake token to bypass auth check
-                  localStorage.setItem('ai_commerce_token', 'demo-token-local');
-                  window.location.reload();
-                }, 500);
+                localStorage.setItem('ai_commerce_token', 'demo-token-local');
+                setTimeout(() => { window.location.href = '/dashboard'; }, 300);
               }} style={{ flex: 1, padding: '10px', borderRadius: 10, background: 'rgba(255,77,26,.1)', border: '1px solid rgba(255,77,26,.25)', color: 'var(--ember2)', cursor: 'pointer', fontWeight: 700, fontSize: 12 }}>
                 👨‍💼 تاجر Demo
               </button>
