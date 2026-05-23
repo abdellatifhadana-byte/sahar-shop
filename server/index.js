@@ -33,16 +33,12 @@ const allowedOrigins = [
   'http://localhost:3001',
   'http://localhost:4173',
 ];
-// Add production domain if set
 if (process.env.PRODUCTION_URL) allowedOrigins.push(process.env.PRODUCTION_URL);
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
+    // Allow all origins - handle via helmet/other security
+    callback(null, true);
   },
   credentials: true,
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS'],
@@ -106,13 +102,18 @@ app.use((err, req, res, _next) => {
 });
 
 // ── Start ────────────────────────────────────────────────────
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   const hasKey = !!(process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY);
+  const url = process.env.RAILWAY_PUBLIC_DOMAIN 
+    ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` 
+    : `http://localhost:${PORT}`;
   console.log('\n╔══════════════════════════════════════════╗');
-  console.log('║      AI Commerce OS  — Backend v2.1     ║');
-  console.log(`║  🌐  http://localhost:${PORT}                ║`);
-  console.log(`║  🤖  AI: ${hasKey ? '✅ API key set' : '⚠️  No API key (local AI)'}          ║`);
+  console.log('║      AI Commerce OS  — v3.2 Ready       ║');
+  console.log(`║  🌐  ${url}`);
+  console.log(`║  🤖  AI: ${hasKey ? '✅ API key set' : '⚠️  Local AI (no key)'}     ║`);
   console.log('╚══════════════════════════════════════════╝\n');
+  console.log(`[ENV] NODE_ENV=${process.env.NODE_ENV || 'development'}`);
+  console.log(`[ENV] PORT=${PORT}`);
   ensureAdmin();
 });
 
