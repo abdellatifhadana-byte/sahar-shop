@@ -62,8 +62,11 @@ export default function NavBar() {
 
   const go = (p: Page) => { setPage(p); setSidebarOpen(false); };
 
-  // Get store link for current user
-  const storeLink = user?.id ? `/store/${user.id}` : null;
+  // Get store link - from state or localStorage fallback
+  const userId = user?.id || (() => {
+    try { const u = localStorage.getItem('ai_commerce_user'); return u ? JSON.parse(u)?.id : null; } catch { return null; }
+  })();
+  const storeLink = userId ? `/store/${userId}` : null;
 
   const handleLogout = () => {
     if (window.confirm('هل تريد الخروج؟')) logout();
@@ -78,14 +81,7 @@ export default function NavBar() {
 
   return (
     <>
-      <style>{`
-        .topnav-desktop { display: none !important; }
-        @media(min-width: 900px) {
-          .topnav-desktop { display: flex !important; }
-          .topnav-mobile  { display: none !important; }
-          .mobile-nav     { display: none !important; }
-        }
-      `}</style>
+
 
       {/* ══ DESKTOP TOP NAV ══════════════════════════════════ */}
       <header className="topnav topnav-desktop" style={{ zIndex:100 }}>
