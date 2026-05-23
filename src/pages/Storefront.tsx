@@ -642,11 +642,18 @@ function TrackingModal({ userId, storeInfo, onClose }: { userId:string; storeInf
 export default function Storefront() {
   // Get userId from URL or window
   const userId = (() => {
+    // From URL path: /store/USER_ID
     const path = window.location.pathname;
     const match = path.match(/\/store\/([^\/\?]+)/);
     if (match) return match[1];
+    // From query string: ?userId=XXX or ?user=XXX
     const params = new URLSearchParams(window.location.search);
-    return params.get('userId') || params.get('user') || '';
+    const qId = params.get('userId') || params.get('user') || params.get('id');
+    if (qId) return qId;
+    // From hash: #USER_ID
+    const hash = window.location.hash.replace('#', '');
+    if (hash && hash.length > 5) return hash;
+    return '';
   })();
 
   const { products, storeInfo, loading, error } = useStorefront(userId);
@@ -689,16 +696,20 @@ export default function Storefront() {
   );
 
   if (!userId) return (
-    <div style={{ minHeight:'100dvh',background:'var(--void)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ink2)',textAlign:'center',padding:24,flexDirection:'column',gap:16 }}>
-      <div style={{ fontSize:48 }}>🏪</div>
-      <div style={{ fontSize:20,fontWeight:900,color:'var(--ink1)' }}>صفحة المتجر</div>
-      <div style={{ fontSize:14,color:'var(--ink3)',maxWidth:300,lineHeight:1.7 }}>
-        هذه الصفحة خاصة بالزبائن. رابط المتجر يكون بهذا الشكل:<br/>
-        <code style={{ background:'var(--panel)',padding:'3px 8px',borderRadius:6,fontSize:12 }}>/store/USER_ID</code>
+    <div dir="rtl" style={{ minHeight:'100dvh',background:'var(--void)',display:'flex',alignItems:'center',justifyContent:'center',color:'var(--ink2)',textAlign:'center',padding:24,flexDirection:'column',gap:20 }}>
+      <div style={{ fontSize:56 }}>🏪</div>
+      <div style={{ fontSize:22,fontWeight:900,color:'var(--ink1)' }}>متجر Sahar Shop</div>
+      <div style={{ fontSize:14,color:'var(--ink3)',maxWidth:360,lineHeight:1.8 }}>
+        مرحباً! للدخول لصفحة المتجر، اطلب من التاجر مشاركة رابط متجره الخاص معك عبر واتساب أو إنستغرام.
       </div>
-      <a href="/dashboard" style={{ padding:'10px 24px',background:'var(--ember)',borderRadius:10,color:'#fff',fontWeight:700,fontSize:14,textDecoration:'none' }}>
-        دخول لوحة التحكم
-      </a>
+      <div style={{ display:'flex',gap:12,flexWrap:'wrap',justifyContent:'center' }}>
+        <a href="/" style={{ padding:'10px 24px',background:'var(--ember)',borderRadius:10,color:'#fff',fontWeight:700,fontSize:14,textDecoration:'none' }}>
+          الصفحة الرئيسية
+        </a>
+        <a href="/login" style={{ padding:'10px 24px',background:'var(--panel)',border:'1px solid var(--border)',borderRadius:10,color:'var(--ink2)',fontWeight:700,fontSize:14,textDecoration:'none' }}>
+          دخول التاجر
+        </a>
+      </div>
     </div>
   );
 
