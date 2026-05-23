@@ -6,7 +6,6 @@ import MainLayout  from './pages/MainLayout';
 import LandingPage from './pages/LandingPage';
 import Storefront  from './pages/Storefront';
 
-// Page → URL mapping
 const PAGE_URLS: Record<string, string> = {
   dashboard:     '/dashboard',
   products:      '/products',
@@ -28,9 +27,8 @@ const URL_PAGES: Record<string, string> = Object.fromEntries(
 
 function getSeasonalTheme(): string {
   const m = new Date().getMonth();
-  const d = new Date().getDate();
-  if (m === 10 && d >= 22 && d <= 30) return 'theme-blackfriday';
   if (m >= 5 && m <= 7) return 'theme-summer';
+  if (m === 10) return 'theme-blackfriday';
   return '';
 }
 
@@ -47,24 +45,19 @@ function ThemeManager() {
   return null;
 }
 
-// Sync URL → page state and page state → URL
 function RouterSync() {
   const { currentPage, setPage } = useStore();
-  const navigate  = useNavigate();
-  const location  = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // When URL changes → update page state
   useEffect(() => {
     const page = URL_PAGES[location.pathname];
     if (page && page !== currentPage) setPage(page as any);
   }, [location.pathname]);
 
-  // When page state changes → update URL
   useEffect(() => {
     const url = PAGE_URLS[currentPage];
-    if (url && location.pathname !== url) {
-      navigate(url, { replace: false });
-    }
+    if (url && location.pathname !== url) navigate(url, { replace: false });
   }, [currentPage]);
 
   return null;
@@ -78,7 +71,7 @@ function AppShell() {
   return (
     <>
       <ThemeManager />
-      <RouterSync />
+      {isAuthed && <RouterSync />}
       <div className="aurora-bg" aria-hidden="true">
         <div className="aurora-blob blob-1" />
         <div className="aurora-blob blob-2" />
@@ -86,35 +79,35 @@ function AppShell() {
       </div>
 
       <Routes>
-        {/* Public storefront */}
-        <Route path="/store/:userId" element={<Storefront />} />
-        <Route path="/store/:userId/*" element={<Storefront />} />
+        {/* ── PUBLIC: Storefront for customers ── */}
+        <Route path="/store"          element={<Storefront />} />
+        <Route path="/store/:userId"  element={<Storefront />} />
+        <Route path="/store/*"        element={<Storefront />} />
 
-        {/* Auth pages */}
-        <Route path="/login"    element={isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
-        <Route path="/register" element={isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
-        <Route path="/landing"  element={<LandingPage />} />
+        {/* ── PUBLIC: Landing page (choose: merchant or customer) ── */}
+        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/auth"    element={isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+        <Route path="/login"   element={isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+        <Route path="/register"element={isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
 
-        {/* Protected app */}
-        <Route path="/dashboard"     element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/products"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/orders"        element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/messages"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/customers"     element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/analytics"     element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/connections"   element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/delivery"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/notifications" element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/settings"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/studio"        element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
-        <Route path="/editor"        element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        {/* ── PROTECTED: Merchant dashboard ── */}
+        {['/dashboard','/products','/orders','/messages','/customers',
+          '/analytics','/connections','/delivery','/notifications',
+          '/settings','/studio','/editor'].map(path => (
+          <Route key={path} path={path}
+            element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        ))}
 
-        {/* Default */}
+        {/* ── ROOT: Show landing page always at / ── */}
         <Route path="/" element={
-          isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />
+          isAuthed
+            ? <Navigate to="/dashboard" replace />
+            : <LandingPage />
         } />
+
+        {/* ── FALLBACK ── */}
         <Route path="*" element={
-          isAuthed ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+          isAuthed ? <Navigate to="/dashboard" replace /> : <LandingPage />
         } />
       </Routes>
     </>
