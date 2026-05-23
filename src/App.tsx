@@ -1,9 +1,30 @@
 import { useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useStore } from './store';
 import AuthPage    from './pages/AuthPage';
 import MainLayout  from './pages/MainLayout';
 import LandingPage from './pages/LandingPage';
 import Storefront  from './pages/Storefront';
+
+// Page → URL mapping
+const PAGE_URLS: Record<string, string> = {
+  dashboard:     '/dashboard',
+  products:      '/products',
+  orders:        '/orders',
+  conversations: '/messages',
+  customers:     '/customers',
+  analytics:     '/analytics',
+  connections:   '/connections',
+  delivery:      '/delivery',
+  notifications: '/notifications',
+  settings:      '/settings',
+  banner:        '/studio',
+  editor:        '/editor',
+};
+
+const URL_PAGES: Record<string, string> = Object.fromEntries(
+  Object.entries(PAGE_URLS).map(([k, v]) => [v, k])
+);
 
 function getSeasonalTheme(): string {
   const m = new Date().getMonth();
@@ -26,27 +47,80 @@ function ThemeManager() {
   return null;
 }
 
-export default function App() {
-  const { token, currentPage } = useStore();
+// Sync URL → page state and page state → URL
+function RouterSync() {
+  const { currentPage, setPage } = useStore();
+  const navigate  = useNavigate();
+  const location  = useLocation();
 
-  // Public storefront
-  if (window.location.pathname.startsWith('/store/')) return <Storefront />;
-  if (currentPage === 'storefront') return <Storefront />;
+  // When URL changes → update page state
+  useEffect(() => {
+    const page = URL_PAGES[location.pathname];
+    if (page && page !== currentPage) setPage(page as any);
+  }, [location.pathname]);
 
-  // Check for demo mode (fake token set by demo button)
+  // When page state changes → update URL
+  useEffect(() => {
+    const url = PAGE_URLS[currentPage];
+    if (url && location.pathname !== url) {
+      navigate(url, { replace: false });
+    }
+  }, [currentPage]);
+
+  return null;
+}
+
+function AppShell() {
+  const { token } = useStore();
   const isDemoMode = token === 'demo-token-local';
+  const isAuthed   = !!token || isDemoMode;
 
   return (
     <>
       <ThemeManager />
+      <RouterSync />
       <div className="aurora-bg" aria-hidden="true">
-        <div className="aurora-blob blob-1" /><div className="aurora-blob blob-2" /><div className="aurora-blob blob-3" />
+        <div className="aurora-blob blob-1" />
+        <div className="aurora-blob blob-2" />
+        <div className="aurora-blob blob-3" />
       </div>
-      {(!token && !isDemoMode) ? (
-        currentPage === 'landing' ? <LandingPage /> : <AuthPage />
-      ) : (
-        <MainLayout />
-      )}
+
+      <Routes>
+        {/* Public storefront */}
+        <Route path="/store/:userId" element={<Storefront />} />
+        <Route path="/store/:userId/*" element={<Storefront />} />
+
+        {/* Auth pages */}
+        <Route path="/login"    element={isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+        <Route path="/register" element={isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
+        <Route path="/landing"  element={<LandingPage />} />
+
+        {/* Protected app */}
+        <Route path="/dashboard"     element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/products"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/orders"        element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/messages"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/customers"     element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/analytics"     element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/connections"   element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/delivery"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/notifications" element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/settings"      element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/studio"        element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+        <Route path="/editor"        element={isAuthed ? <MainLayout /> : <Navigate to="/login" replace />} />
+
+        {/* Default */}
+        <Route path="/" element={
+          isAuthed ? <Navigate to="/dashboard" replace /> : <AuthPage />
+        } />
+        <Route path="*" element={
+          isAuthed ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+        } />
+      </Routes>
     </>
   );
+}
+
+export default function App() {
+  return <AppShell />;
 }
